@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Learn Directory Enumeration{% endblock %}
+
+{% block content %}
+<div class="lab-container">
+    <h2>Directory Enumeration Vulnerability</h2>
+    
+    <div class="description">
+        <h3>Concept</h3>
+        <p>Web servers may contain hidden directories not linked on the website.</p>
+        <p>Although they aren't visible or accessible from the homepage, if the files physically exist on the server (like an admin panel), anyone knowing the path could reach them.</p>
+        <h3 style="margin-top: 2rem;">Tools Used for Directory Enumeration</h3>
+        <p>Attackers use automated tools to discover hidden directories.</p>
+        <p>Example tools:</p>
+        <ul style="margin-top: 1rem; margin-left: 2rem; color: #8b949e;">
+            <li>Gobuster</li>
+            <li>Dirb</li>
+            <li>FFUF</li>
+        </ul>
+        <p style="margin-top: 1rem;">Example command:</p>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">gobuster dir -u http://target-site -w wordlist.txt</pre>
+        <p>The tool tries many possible directory names using a wordlist.</p>
+
+        <p style="margin-top: 1rem;">Example discovered paths:</p>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #f85149; background: #000;">/admin-panel
+/backup
+/uploads</pre>
+        <p>Attackers then visit the discovered path.</p>
+
+        <h3 style="margin-top: 2rem;">Example Attack</h3>
+        <p>If a target website is located at:</p>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">http://example.com</pre>
+        <p>Attackers may discover hidden paths like:</p>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #f85149; background: #000;">/admin
+/backup
+/secret</pre>
+
+        <h3 style="margin-top: 2rem;">Real World Impact</h3>
+        <p>Finding hidden directories might expose sensitive functionality or data, such as:</p>
+        <ul style="margin-top: 1rem; margin-left: 2rem; color: #8b949e;">
+            <li>admin dashboards</li>
+            <li>backup files (.bak, .zip)</li>
+            <li>configuration files (.env, .git)</li>
+        </ul>
+
+        <h3 style="margin-top: 2rem;">Lab Instructions</h3>
+        <p><strong>Goal:</strong><br>
+        <p><strong>Goal:</strong><br>
+        Find the hidden admin panel and retrieve the flag.</p>
+        <p><strong>Steps:</strong></p>
+        <ol style="margin-top: 1rem; margin-left: 2rem; color: #8b949e;">
+            <li>Use the directory scanner tool</li>
+            <li>Discover hidden paths</li>
+            <li>Visit the discovered path</li>
+            <li>Retrieve the flag</li>
+            <li>Submit the flag</li>
+        </ol>
+    </div>
+
+    <div class="lab-actions" style="margin-top: 3rem; border-top: 1px dashed #30363d; padding-top: 2rem;">
+        <a href="{{ url_for('lab_directory_enum') }}" class="btn">&gt; Start Lab</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Learn Command Injection{% endblock %}
+
+{% block content %}
+<div class="lab-container">
+    <h2>Command Injection Vulnerability</h2>
+    
+    <div class="description">
+        <h3>Concept</h3>
+        <p>Command injection happens when user input is passed directly to system commands.</p>
+        <p>Example vulnerable code:</p>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #f85149; background: #000;">os.system("ping " + user_input)</pre>
+        <p>Attackers can append additional commands to the input.</p>
+
+        <h3 style="margin-top: 2rem;">Example Attack</h3>
+        <p>Show example input:</p>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">8.8.8.8; cat flag.txt</pre>
+        <p>The semicolon allows execution of another command.</p>
+
+        <h3 style="margin-top: 2rem;">Real World Impact</h3>
+        <p>Attackers could run commands like:</p>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #f85149; background: #000;">ls
+whoami
+cat /etc/passwd</pre>
+        <p>This could lead to full server compromise.</p>
+
+        <h3 style="margin-top: 2rem;">Prevention</h3>
+        <p>Best practices:</p>
+        <ul style="margin-top: 1rem; margin-left: 2rem; color: #8b949e;">
+            <li>Never pass raw user input to shell commands</li>
+            <li>Use safe libraries instead of shell execution</li>
+            <li>Sanitize and validate input</li>
+        </ul>
+
+        <h3 style="margin-top: 2rem;">Lab Instructions</h3>
+        <p><strong>Goal:</strong><br>
+        Retrieve the hidden flag from the server.</p>
+        <p><strong>Steps:</strong></p>
+        <ol style="margin-top: 1rem; margin-left: 2rem; color: #8b949e;">
+            <li>Use the ping tool</li>
+            <li>Try injecting additional commands</li>
+            <li>Retrieve the contents of <code>flag.txt</code></li>
+            <li>Submit the flag</li>
+        </ol>
+    </div>
+
+    <div class="lab-actions" style="margin-top: 3rem; border-top: 1px dashed #30363d; padding-top: 2rem;">
+        <a href="{{ url_for('lab_command_injection') }}" class="btn">&gt; Start Lab</a>
+    </div>
+</div>
+{% endblock %}

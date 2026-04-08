@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}ThreatLab Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h2>Welcome to ThreatLab</h2>
+    <h3 style="margin-top: 1.5rem;">Available Labs</h3>
+    
+    <div class="lab-card">
+        <h3>Easy — Directory Enumeration</h3>
+        <p>Learn how hidden directories can expose sensitive information.</p>
+        <a href="{{ url_for('learn_directory_enum') }}" class="btn">&gt; Start Directory Enumeration</a>
+    </div>
+    
+    <div class="lab-card">
+        <h3>Medium — Command Injection</h3>
+        <p>Learn about command injection vulnerabilities.</p>
+        <a href="{{ url_for('learn_command_injection') }}" class="btn">&gt; Start Command Injection Lab</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Directory Enumeration Lab{% endblock %}
+
+{% block content %}
+<div class="lab-container">
+    <h2>Welcome to the ThreatLab Demo Website</h2>
+    <p class="description">
+        This site contains hidden directories. Try to discover them!
+    </p>
+
+    <div style="margin-top: 2rem; padding: 2rem; border: 1px solid var(--border-color); background-color: rgba(22, 27, 34, 0.5); text-align: center;">
+        <p style="font-size: 1.2rem; margin-bottom: 1rem; color: #8b949e;">Nothing to see here directly on the homepage...</p>
+        <p style="font-size: 0.9rem; color: #8b949e; font-style: italic;">(Hint: Have you tried changing the URL path?)</p>
+    </div>
+
+    <div class="instructions-section" style="margin-top: 2rem;">
+        <h3>Lab Instructions</h3>
+        <p><strong>Goal:</strong> Find the hidden admin panel and retrieve the flag.</p>
+        <p><strong>Steps:</strong></p>
+        <ol style="margin-top: 1rem; margin-left: 2rem; color: #8b949e;">
+            <li>Use the directory scanner tool</li>
+            <li>Discover hidden paths</li>
+            <li>Visit the discovered path</li>
+            <li>Retrieve the flag</li>
+            <li>Submit the flag</li>
+        </ol>
+    </div>
+
+    <div class="tool-section" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px dashed var(--border-color);">
+        <h3>Directory Scanner Tool</h3>
+        <p class="description">Simulate a directory brute-force attack.</p>
+        <button id="start-scan-btn" class="btn" style="margin-bottom: 1.5rem;">Start Scan</button>
+        
+        <div class="output-container" id="scanner-terminal" style="display: none;">
+            <h4>Scanner Output:</h4>
+            <pre class="command-output" id="scanner-output"></pre>
+        </div>
+    </div>
+
+    <!-- Flag Submission Form -->
+    <div class="submit-section" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px dashed var(--border-color);">
+        <h3>Submit Flag</h3>
+        <form action="{{ url_for('submit_directory_flag') }}" method="POST" class="lab-form">
+            <input type="text" name="flag" placeholder="Enter flag here" class="input-field" required>
+            <button type="submit" class="btn btn-secondary">Submit</button>
+        </form>
+        
+        {% if flag_result %}
+        <div class="result-message {% if 'Correct' in flag_result %}success{% else %}error{% endif %}">
+            <strong>{{ flag_result }}</strong>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    document.getElementById('start-scan-btn').addEventListener('click', function() {
+        const btn = this;
+        const terminal = document.getElementById('scanner-terminal');
+        const output = document.getElementById('scanner-output');
+        
+        btn.disabled = true;
+        terminal.style.display = 'block';
+        output.innerHTML = ''; // Clear previous output
+        
+        const lines = [
+            "Scanning target http://127.0.0.1:5000...",
+            "Trying common directories...",
+            "",
+            "/admin ............ <span style='color: #f85149'>404</span>",
+            "/backup ........... <span style='color: #f85149'>404</span>",
+            "/uploads .......... <span style='color: #f85149'>404</span>",
+            "",
+            "<a href='/admin-panel' style='color: #3fb950; text-decoration: underline;' target='_blank'>/admin-panel</a> ...... <span style='color: #3fb950'>200 OK</span>",
+            "",
+            "Scan complete."
+        ];
+        
+        // Add styling for scrolling output
+        output.style.maxHeight = '250px';
+        output.style.overflowY = 'auto';
+
+        let i = 0;
+        function printNextLine() {
+            if (i < lines.length) {
+                output.innerHTML += lines[i] + '<br>';
+                output.scrollTop = output.scrollHeight; // Auto-scroll
+                i++;
+                // Add a random delay between 300ms and 600ms
+                const delay = Math.floor(Math.random() * 301) + 300;
+                setTimeout(printNextLine, delay);
+            } else {
+                btn.disabled = false;
+            }
+        }
+        
+        printNextLine();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Administrative Panel{% endblock %}
+
+{% block content %}
+<div class="lab-container">
+    <h2 style="color: #f85149;">Admin Panel</h2>
+    
+    <div style="margin-top: 2rem; padding: 2rem; border: 1px solid var(--border-color); background-color: rgba(248, 81, 73, 0.05);">
+        <p style="font-size: 1.2rem; margin-bottom: 2rem;">You discovered the hidden admin panel.</p>
+        
+        <div style="padding: 1rem; background-color: #000; border: 1px dashed #f85149; text-align: center;">
+            <p style="color: #8b949e; margin-bottom: 0.5rem; font-size: 0.9rem;">CONFIDENTIAL FLAG:</p>
+            <code style="color: #3fb950; font-size: 1.5rem; font-weight: bold;">flag{directory_master}</code>
+        </div>
+        
+        <div style="margin-top: 3rem;">
+            <a href="{{ url_for('lab_directory_enum') }}" class="btn btn-secondary">&lt; Back to Lab</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
