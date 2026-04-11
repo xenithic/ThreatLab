@@ -4,24 +4,28 @@
 
 {% block content %}
 <div class="lab-container">
-    <h2>Welcome to the ThreatLab Demo Website</h2>
+    <h2>Welcome to ThreatLab Corp.</h2>
     <p class="description">
-        This site contains hidden directories. Try to discover them!
+        Our company website. Everything is perfectly secured.
     </p>
 
-    <div style="margin-top: 2rem; padding: 2rem; border: 1px solid var(--border-color); background-color: rgba(22, 27, 34, 0.5); text-align: center;">
-        <p style="font-size: 1.2rem; margin-bottom: 1rem; color: #8b949e;">Nothing to see here directly on the homepage...</p>
-        <p style="font-size: 0.9rem; color: #8b949e; font-style: italic;">(Hint: Have you tried changing the URL path?)</p>
+    <!-- TODO: remove backup endpoints before production -->
+    <!-- old endpoints: /backup /admin_old -->
+
+    <div style="margin-top: 2rem; padding: 2rem; border: 1px solid var(--border-color); background-color: rgba(22, 27, 34, 0.5);">
+        <h3>About Us</h3>
+        <p style="color: #8b949e; margin-top: 1rem;">ThreatLab Corp. is a leading cybersecurity firm. We take security very seriously and have ensured that no sensitive endpoints are publicly accessible.</p>
+        <p style="color: #8b949e; margin-top: 1rem;">If you believe you have found a vulnerability, please contact our security team.</p>
     </div>
 
     <div class="instructions-section" style="margin-top: 2rem;">
         <h3>Lab Instructions</h3>
-        <p><strong>Goal:</strong> Find the hidden admin panel and retrieve the flag.</p>
+        <p><strong>Goal:</strong> Discover hidden endpoints on this web server and retrieve the flag.</p>
         <p><strong>Steps:</strong></p>
         <ol style="margin-top: 1rem; margin-left: 2rem; color: #8b949e;">
+            <li>Inspect the page source for clues</li>
             <li>Use the directory scanner tool</li>
-            <li>Discover hidden paths</li>
-            <li>Visit the discovered path</li>
+            <li>Investigate discovered paths</li>
             <li>Retrieve the flag</li>
             <li>Submit the flag</li>
         </ol>
@@ -29,7 +33,7 @@
 
     <div class="tool-section" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px dashed var(--border-color);">
         <h3>Directory Scanner Tool</h3>
-        <p class="description">Simulate a directory brute-force attack.</p>
+        <p class="description">Simulate a directory brute-force scan against this server.</p>
         <button id="start-scan-btn" class="btn" style="margin-bottom: 1.5rem;">Start Scan</button>
         
         <div class="output-container" id="scanner-terminal" style="display: none;">
@@ -62,35 +66,59 @@
         
         btn.disabled = true;
         terminal.style.display = 'block';
-        output.innerHTML = ''; // Clear previous output
+        output.innerHTML = '';
         
         const lines = [
-            "Scanning target http://127.0.0.1:5000...",
-            "Trying common directories...",
+            "<span style='color: #d29922;'>Gobuster v3.1.0</span>",
+            "===============================================",
+            "Target:     http://127.0.0.1:5000",
+            "Wordlist:   /usr/share/wordlists/common.txt",
+            "Threads:    10",
+            "===============================================",
             "",
-            "/admin ............ <span style='color: #f85149'>404</span>",
-            "/backup ........... <span style='color: #f85149'>404</span>",
-            "/uploads .......... <span style='color: #f85149'>404</span>",
+            "[00:01] Starting scan...",
             "",
-            "<a href='/admin-panel' style='color: #3fb950; text-decoration: underline;' target='_blank'>/admin-panel</a> ...... <span style='color: #3fb950'>200 OK</span>",
+            "/index ............. <span style='color: #f85149'>404</span>",
+            "/login ............. <span style='color: #f85149'>404</span>",
+            "/admin ............. <span style='color: #f85149'>404</span>",
+            "/dashboard ......... <span style='color: #d29922'>301</span> → /",
+            "/backup ............ <span style='color: #d29922'>200</span> (empty)",
+            "/uploads ........... <span style='color: #f85149'>404</span>",
+            "/api ............... <span style='color: #f85149'>404</span>",
+            "/config ............ <span style='color: #f85149'>404</span>",
+            "/admin-panel ....... <span style='color: #3fb950'>200 OK</span>",
+            "/secret ............ <span style='color: #f85149'>404</span>",
+            "/test .............. <span style='color: #f85149'>404</span>",
             "",
-            "Scan complete."
+            "===============================================",
+            "Scan complete. <span style='color: #3fb950'>1</span> interesting result(s) found.",
+            "",
+            "Results with status 200:",
+            "  <span id='result-link' style='color: #8b949e; cursor: default;'>/admin-panel</span> ....... 200 OK"
         ];
         
-        // Add styling for scrolling output
-        output.style.maxHeight = '250px';
+        output.style.maxHeight = '300px';
         output.style.overflowY = 'auto';
 
         let i = 0;
         function printNextLine() {
             if (i < lines.length) {
                 output.innerHTML += lines[i] + '<br>';
-                output.scrollTop = output.scrollHeight; // Auto-scroll
+                output.scrollTop = output.scrollHeight;
                 i++;
-                // Add a random delay between 300ms and 600ms
                 const delay = Math.floor(Math.random() * 301) + 300;
                 setTimeout(printNextLine, delay);
             } else {
+                // Make result clickable only AFTER scan completes
+                const link = document.getElementById('result-link');
+                if (link) {
+                    link.style.color = '#3fb950';
+                    link.style.textDecoration = 'underline';
+                    link.style.cursor = 'pointer';
+                    link.addEventListener('click', function() {
+                        window.open('/admin-panel', '_blank');
+                    });
+                }
                 btn.disabled = false;
             }
         }

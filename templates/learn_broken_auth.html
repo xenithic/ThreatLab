@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Learn Broken Authentication{% endblock %}
+
+{% block content %}
+<div class="lab-container">
+    <h2>Broken Authentication</h2>
+    
+    <div class="description">
+        <h3>Concept</h3>
+        <p>Applications sometimes trust user input for authentication instead of securely verifying identity on the server side.</p>
+        <p>If an application relies on client-supplied data (like a URL parameter or form field) to determine who is logged in, an attacker can simply change that value.</p>
+
+        <h3 style="margin-top: 2rem;">Example</h3>
+        <p>A URL like:</p>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #f85149; background: #000;">/profile?user=admin</pre>
+        <p>could grant unauthorized access to the admin profile if the server blindly trusts the <code>user</code> parameter.</p>
+
+        <h3 style="margin-top: 2rem;">Impact</h3>
+        <p>Attackers can impersonate other users, access privileged accounts, and perform unauthorized actions across the platform.</p>
+
+        <h3 style="margin-top: 2rem;">Lab Instructions</h3>
+        <p><strong>Goal:</strong><br>
+        Access the admin profile and retrieve the flag.</p>
+        <p><strong>Steps:</strong></p>
+        <ol style="margin-top: 1rem; margin-left: 2rem; color: #8b949e;">
+            <li>Try different usernames</li>
+            <li>Think about how authentication is handled</li>
+            <li>Try "admin"</li>
+        </ol>
+    </div>
+
+    <div class="lab-actions" style="margin-top: 3rem; border-top: 1px dashed #30363d; padding-top: 2rem;">
+        <a href="{{ url_for('lab_broken_auth') }}" class="btn">&gt; Start Lab</a>
+    </div>
+</div>
+{% endblock %}

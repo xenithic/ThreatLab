@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Debug Log{% endblock %}
+
+{% block content %}
+<div class="lab-container">
+    <h2 style="color: #f85149;">&#9888; Debug Log — CONFIDENTIAL</h2>
+    <p class="description">This file should not be publicly accessible.</p>
+
+    <div class="output-container" style="margin-top: 2rem;">
+        <h4>debug.log</h4>
+        <pre class="command-output">[2026-03-15 08:12:01] [INFO]  System started
+[2026-03-15 08:12:01] [INFO]  Loading configuration...
+[2026-03-15 08:12:02] [INFO]  Database connected
+[2026-03-15 08:12:02] [DEBUG] Loading credentials...
+[2026-03-15 08:12:03] [DEBUG] DB_HOST=localhost
+[2026-03-15 08:12:03] [DEBUG] DB_USER=admin
+[2026-03-15 08:12:03] [DEBUG] DB_PASSWORD=supersecret123
+[2026-03-15 08:12:03] [DEBUG] FLAG=flag{data_exposed}
+[2026-03-15 08:12:04] [INFO]  Server ready on port 5000
+[2026-03-15 08:12:04] [WARN]  Debug mode log — remove before deployment</pre>
+    </div>
+
+    <div style="margin-top: 2rem;">
+        <a href="{{ url_for('lab_data_exposure') }}" class="btn btn-secondary">&lt; Back to Lab</a>
+    </div>
+</div>
+{% endblock %}

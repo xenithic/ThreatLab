@@ -49,6 +49,14 @@ def learn_directory_enum():
 def lab_directory_enum():
     return render_template('lab_directory_enum.html')
 
+@app.route('/admin')
+def fake_admin():
+    return '<h1>404 Not Found</h1><p>The requested URL was not found on this server.</p>', 404
+
+@app.route('/backup')
+def fake_backup():
+    return '<h1>Nothing here</h1><p>This page is empty.</p>'
+
 @app.route('/admin-panel')
 def admin_panel():
     return render_template('admin_panel.html')
@@ -61,6 +69,60 @@ def submit_directory_flag():
     else:
         flag_result = "Incorrect flag."
     return render_template('lab_directory_enum.html', flag_result=flag_result)
+
+# --- Broken Authentication Lab ---
+
+@app.route('/learn/broken-auth')
+def learn_broken_auth():
+    return render_template('learn_broken_auth.html')
+
+@app.route('/lab/broken-auth')
+def lab_broken_auth():
+    return render_template('lab_broken_auth.html')
+
+@app.route('/profile')
+def profile():
+    user = request.args.get('user', '')
+    flag = None
+    if user == 'admin':
+        flag = 'flag{auth_bypass}'
+    return render_template('profile.html', user=user, flag=flag)
+
+@app.route('/submit-broken-auth', methods=['POST'])
+def submit_broken_auth():
+    flag = request.form.get('flag')
+    if flag == "flag{auth_bypass}":
+        flag_result = "Correct! Broken Authentication Lab Completed!"
+    else:
+        flag_result = "Incorrect flag."
+    return render_template('lab_broken_auth.html', flag_result=flag_result)
+
+# --- Sensitive Data Exposure Lab ---
+
+@app.route('/learn/data-exposure')
+def learn_data_exposure():
+    return render_template('learn_data_exposure.html')
+
+@app.route('/lab/data-exposure')
+def lab_data_exposure():
+    return render_template('lab_data_exposure.html')
+
+@app.route('/config')
+def config_page():
+    return render_template('config.html')
+
+@app.route('/debug.log')
+def debug_log():
+    return render_template('debug_log.html')
+
+@app.route('/submit-data-exposure', methods=['POST'])
+def submit_data_exposure():
+    flag = request.form.get('flag')
+    if flag == "flag{data_exposed}":
+        flag_result = "Correct! Sensitive Data Exposure Lab Completed!"
+    else:
+        flag_result = "Incorrect flag."
+    return render_template('lab_data_exposure.html', flag_result=flag_result)
 
 if __name__ == '__main__':
     app.run(debug=True)

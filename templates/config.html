@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}System Configuration{% endblock %}
+
+{% block content %}
+<div class="lab-container">
+    <h2>System Configuration</h2>
+    <p class="description">Current server configuration values.</p>
+
+    <div class="output-container" style="margin-top: 2rem;">
+        <h4>config.yaml</h4>
+        <pre class="command-output">server:
+  host: 0.0.0.0
+  port: 5000
+  debug: false
+  env: production
+
+database:
+  host: localhost
+  port: 5432
+  name: threatlab_db
+
+# -------------------------------------------
+# old backup config (do not use)
+# DB_USER=admin
+# DB_PASS=admin123
+# -------------------------------------------
+
+api:
+  endpoint: /api/v1/
+  rate_limit: 100
+
+logging:
+  level: INFO
+  file: app.log
+
+<!-- TODO: remove debug file /debug.log --></pre>
+    </div>
+
+    <div style="margin-top: 2rem;">
+        <a href="{{ url_for('lab_data_exposure') }}" class="btn btn-secondary">&lt; Back to Lab</a>
+    </div>
+</div>
+{% endblock %}

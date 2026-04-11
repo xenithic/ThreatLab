@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}User Profile{% endblock %}
+
+{% block content %}
+<div class="lab-container">
+    <h2>User Profile</h2>
+
+    {% if user %}
+    <div class="output-container" style="margin-top: 2rem;">
+        <h4>Profile: {{ user }}</h4>
+        <pre class="command-output">Username: {{ user }}
+Role:     {% if user == 'admin' %}Administrator{% else %}Standard User{% endif %}
+Status:   Active
+
+{% if flag %}------------------------------
+ACCESS GRANTED — Admin Panel
+
+{{ flag }}
+------------------------------{% endif %}</pre>
+    </div>
+    {% else %}
+    <div style="margin-top: 2rem; padding: 2rem; border: 1px solid var(--border-color); background-color: rgba(248, 81, 73, 0.05);">
+        <p style="color: #f85149;">No user specified. Use <code>/profile?user=&lt;username&gt;</code></p>
+    </div>
+    {% endif %}
+
+    <div style="margin-top: 2rem;">
+        <a href="{{ url_for('lab_broken_auth') }}" class="btn btn-secondary">&lt; Back to Lab</a>
+    </div>
+</div>
+{% endblock %}

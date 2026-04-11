@@ -6,15 +6,31 @@
 <div class="dashboard-container">
     <h2>Welcome to ThreatLab</h2>
     <h3 style="margin-top: 1.5rem;">Available Labs</h3>
+
+    <h3 style="margin-top: 1.5rem; color: #3fb950;">Easy</h3>
     
     <div class="lab-card">
-        <h3>Easy — Directory Enumeration</h3>
+        <h3>Directory Enumeration</h3>
         <p>Learn how hidden directories can expose sensitive information.</p>
         <a href="{{ url_for('learn_directory_enum') }}" class="btn">&gt; Start Directory Enumeration</a>
     </div>
     
     <div class="lab-card">
-        <h3>Medium — Command Injection</h3>
+        <h3>Broken Authentication</h3>
+        <p>Learn how weak authentication can be bypassed.</p>
+        <a href="{{ url_for('learn_broken_auth') }}" class="btn">&gt; Start Broken Authentication</a>
+    </div>
+    
+    <div class="lab-card">
+        <h3>Sensitive Data Exposure</h3>
+        <p>Discover how applications can unintentionally leak sensitive data.</p>
+        <a href="{{ url_for('learn_data_exposure') }}" class="btn">&gt; Start Data Exposure</a>
+    </div>
+
+    <h3 style="margin-top: 2rem; color: #d29922;">Medium</h3>
+    
+    <div class="lab-card">
+        <h3>Command Injection</h3>
         <p>Learn about command injection vulnerabilities.</p>
         <a href="{{ url_for('learn_command_injection') }}" class="btn">&gt; Start Command Injection Lab</a>
     </div>

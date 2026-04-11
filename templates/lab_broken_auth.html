@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Broken Authentication Lab{% endblock %}
+
+{% block content %}
+<div class="lab-container">
+    <h2>Profile Lookup Tool</h2>
+    <p class="description">This tool allows you to look up user profiles on the system.</p>
+
+    <div style="margin-top: 2rem; padding: 2rem; border: 1px solid var(--border-color); background-color: rgba(22, 27, 34, 0.5);">
+        <h3>Usage</h3>
+        <p style="margin-top: 1rem; color: #8b949e;">Access profiles using the URL parameter:</p>
+        <pre class="command-output" style="margin-top: 1rem; display: block; border-left: 3px solid #3fb950; background: #000;">/profile?user=&lt;username&gt;</pre>
+        <p style="margin-top: 1rem; color: #8b949e;">Try it out — some example users might be: <code>guest</code>, <code>user</code>, <code>john</code></p>
+    </div>
+
+    <div class="instructions-section" style="margin-top: 2rem;">
+        <h3>Lab Instructions</h3>
+        <p><strong>Goal:</strong> Access a privileged profile and retrieve the flag.</p>
+        <p><strong>Steps:</strong></p>
+        <ol style="margin-top: 1rem; margin-left: 2rem; color: #8b949e;">
+            <li>Use the profile lookup tool via URL parameters</li>
+            <li>Try different usernames</li>
+            <li>Think about which user might have elevated privileges</li>
+            <li>Retrieve the flag</li>
+            <li>Submit the flag</li>
+        </ol>
+    </div>
+
+    <!-- Flag Submission Form -->
+    <div class="submit-section" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px dashed var(--border-color);">
+        <h3>Submit Flag</h3>
+        <form action="{{ url_for('submit_broken_auth') }}" method="POST" class="lab-form">
+            <input type="text" name="flag" placeholder="Enter flag here" class="input-field" required>
+            <button type="submit" class="btn btn-secondary">Submit</button>
+        </form>
+        
+        {% if flag_result %}
+        <div class="result-message {% if 'Correct' in flag_result %}success{% else %}error{% endif %}">
+            <strong>{{ flag_result }}</strong>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

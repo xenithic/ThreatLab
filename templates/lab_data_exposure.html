@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Sensitive Data Exposure Lab{% endblock %}
+
+{% block content %}
+<div class="lab-container">
+    <h2>Company Portal</h2>
+    <p class="description">Welcome to the ThreatLab Corp. internal portal.</p>
+
+    <div style="margin-top: 2rem; padding: 2rem; border: 1px solid var(--border-color); background-color: rgba(22, 27, 34, 0.5);">
+        <h3>Navigation</h3>
+        <ul style="margin-top: 1rem; margin-left: 2rem; color: #8b949e;">
+            <li><a href="/config" style="color: #3fb950;">/config</a> — System Configuration</li>
+            <li style="color: #58a6ff;">More pages coming soon...</li>
+        </ul>
+    </div>
+
+    <div class="instructions-section" style="margin-top: 2rem;">
+        <h3>Lab Instructions</h3>
+        <p><strong>Goal:</strong> Find sensitive information and retrieve the flag.</p>
+        <p><strong>Steps:</strong></p>
+        <ol style="margin-top: 1rem; margin-left: 2rem; color: #8b949e;">
+            <li>Explore the available pages</li>
+            <li>Read the content carefully — look for clues</li>
+            <li>Follow trails to discover hidden files</li>
+            <li>Extract the flag</li>
+            <li>Submit the flag</li>
+        </ol>
+    </div>
+
+    <!-- Flag Submission Form -->
+    <div class="submit-section" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px dashed var(--border-color);">
+        <h3>Submit Flag</h3>
+        <form action="{{ url_for('submit_data_exposure') }}" method="POST" class="lab-form">
+            <input type="text" name="flag" placeholder="Enter flag here" class="input-field" required>
+            <button type="submit" class="btn btn-secondary">Submit</button>
+        </form>
+        
+        {% if flag_result %}
+        <div class="result-message {% if 'Correct' in flag_result %}success{% else %}error{% endif %}">
+            <strong>{{ flag_result }}</strong>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
