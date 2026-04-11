@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Nmap Network Scanning Lab{% endblock %}
+
+{% block content %}
+<div class="lab-container">
+    <h2>Network Scanning Lab</h2>
+    <p class="description">A hidden service is running somewhere on this machine. Use Nmap to find it.</p>
+
+    <div style="margin-top: 2rem; padding: 2rem; border: 1px solid var(--border-color); background-color: rgba(22, 27, 34, 0.5);">
+        <h3>&#9881; Lab Environment</h3>
+        <p style="margin-top: 1rem; color: #8b949e;">The ThreatLab platform is running on <code>http://127.0.0.1:5000</code></p>
+        <p style="margin-top: 0.5rem; color: #8b949e;">There may be other services running on this machine that are not linked from this website.</p>
+        <p style="margin-top: 0.5rem; color: #f85149; font-style: italic;">Your job is to find them.</p>
+    </div>
+
+    <div class="instructions-section" style="margin-top: 2rem;">
+        <h3>Instructions</h3>
+        <p><strong>Step 1:</strong> Open your terminal and run:</p>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">nmap 127.0.0.1</pre>
+        
+        <p style="margin-top: 1rem;"><strong>Step 2:</strong> Identify open ports in the scan results.</p>
+        
+        <p style="margin-top: 1rem;"><strong>Step 3:</strong> Look for any unusual or unexpected services.</p>
+        
+        <p style="margin-top: 1rem;"><strong>Step 4:</strong> Visit the discovered service in your browser.</p>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #d29922; background: #000;">http://127.0.0.1:&lt;discovered_port&gt;</pre>
+        
+        <p style="margin-top: 1rem;"><strong>Step 5:</strong> Retrieve the flag and submit it below.</p>
+    </div>
+
+    <div style="margin-top: 2rem; padding: 1.5rem; border: 1px dashed #d29922; background-color: rgba(210, 153, 34, 0.05); border-radius: 4px;">
+        <p style="color: #d29922;"><strong>&#9888; Important:</strong> Make sure <code>service_app.py</code> is running before you begin scanning.</p>
+        <p style="margin-top: 0.5rem; color: #8b949e;">In a separate terminal, run:</p>
+        <pre class="command-output" style="margin: 0.5rem 0; display: block; border-left: 3px solid #d29922; background: #000;">python service_app.py</pre>
+    </div>
+
+    <!-- Flag Submission Form -->
+    <div class="submit-section" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px dashed var(--border-color);">
+        <h3>Submit Flag</h3>
+        <form action="{{ url_for('submit_nmap') }}" method="POST" class="lab-form">
+            <input type="text" name="flag" placeholder="Enter flag here" class="input-field" required>
+            <button type="submit" class="btn btn-secondary">Submit</button>
+        </form>
+        
+        {% if flag_result %}
+        <div class="result-message {% if 'Correct' in flag_result %}success{% else %}error{% endif %}">
+            <strong>{{ flag_result }}</strong>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

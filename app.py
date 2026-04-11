@@ -124,5 +124,24 @@ def submit_data_exposure():
         flag_result = "Incorrect flag."
     return render_template('lab_data_exposure.html', flag_result=flag_result)
 
+# --- Nmap Network Scanning Lab ---
+
+@app.route('/learn/nmap')
+def learn_nmap():
+    return render_template('learn_nmap.html')
+
+@app.route('/lab/nmap')
+def lab_nmap():
+    return render_template('lab_nmap.html')
+
+@app.route('/submit-nmap', methods=['POST'])
+def submit_nmap():
+    flag = request.form.get('flag')
+    if flag == "flag{nmap_master}":
+        flag_result = "Correct! Nmap Network Scanning Lab Completed!"
+    else:
+        flag_result = "Incorrect flag."
+    return render_template('lab_nmap.html', flag_result=flag_result)
+
 if __name__ == '__main__':
     app.run(debug=True)

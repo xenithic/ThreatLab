@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Learn Network Scanning with Nmap{% endblock %}
+
+{% block content %}
+<div class="lab-container">
+    <h2>Network Scanning with Nmap</h2>
+    
+    <div class="description">
+        <h3>Concept</h3>
+        <p><strong>Nmap</strong> (Network Mapper) is an open-source tool used for network discovery and security auditing. It is one of the most widely used tools in penetration testing.</p>
+        <p style="margin-top: 1rem;">Nmap can discover:</p>
+        <ul style="margin-top: 0.5rem; margin-left: 2rem; color: #8b949e;">
+            <li>Open ports on a target machine</li>
+            <li>Running services and their versions</li>
+            <li>Operating system details</li>
+            <li>Hidden or unexpected services</li>
+        </ul>
+
+        <h3 style="margin-top: 2rem;">Example Commands</h3>
+        <p>Basic port scan:</p>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">nmap 127.0.0.1</pre>
+        <p>Scan a specific port range:</p>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">nmap -p 5000-5100 127.0.0.1</pre>
+        <p>Service version detection:</p>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">nmap -sV 127.0.0.1</pre>
+
+        <h3 style="margin-top: 2rem;">What To Look For</h3>
+        <p>When scanning a target, look for:</p>
+        <ul style="margin-top: 0.5rem; margin-left: 2rem; color: #8b949e;">
+            <li>Ports in <strong>OPEN</strong> state</li>
+            <li>Unexpected services running on non-standard ports</li>
+            <li>Internal services that shouldn't be publicly accessible</li>
+        </ul>
+
+        <h3 style="margin-top: 2rem;">Real World Impact</h3>
+        <p>Attackers use Nmap to map out a target's attack surface. Discovering an unprotected internal service can lead to data leaks, unauthorized access, or full system compromise.</p>
+
+        <h3 style="margin-top: 2rem;">Lab Instructions</h3>
+        <p><strong>Goal:</strong><br>
+        Find open ports on localhost and discover a hidden service containing the flag.</p>
+        <p><strong>Steps:</strong></p>
+        <ol style="margin-top: 1rem; margin-left: 2rem; color: #8b949e;">
+            <li>Run Nmap against <code>127.0.0.1</code></li>
+            <li>Identify all open ports</li>
+            <li>Look for any unusual or unexpected services</li>
+            <li>Visit the discovered service in your browser</li>
+            <li>Retrieve the flag</li>
+            <li>Submit the flag</li>
+        </ol>
+    </div>
+
+    <div class="lab-actions" style="margin-top: 3rem; border-top: 1px dashed #30363d; padding-top: 2rem;">
+        <a href="{{ url_for('lab_nmap') }}" class="btn">&gt; Start Lab</a>
+    </div>
+</div>
+{% endblock %}
