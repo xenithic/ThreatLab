@@ -19,11 +19,11 @@
 
         <h3 style="margin-top: 2rem;">Example Commands</h3>
         <p>Basic port scan:</p>
-        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">nmap 127.0.0.1</pre>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">nmap {{ target_host }}</pre>
         <p>Scan a specific port range:</p>
-        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">nmap -p 5000-5100 127.0.0.1</pre>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">nmap -p 5000-5100 {{ target_host }}</pre>
         <p>Service version detection:</p>
-        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">nmap -sV 127.0.0.1</pre>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">nmap -sV {{ target_host }}</pre>
 
         <h3 style="margin-top: 2rem;">What To Look For</h3>
         <p>When scanning a target, look for:</p>
@@ -41,7 +41,7 @@
         Find open ports on localhost and discover a hidden service containing the flag.</p>
         <p><strong>Steps:</strong></p>
         <ol style="margin-top: 1rem; margin-left: 2rem; color: #8b949e;">
-            <li>Run Nmap against <code>127.0.0.1</code></li>
+            <li>Run Nmap against <code>{{ target_host }}</code></li>
             <li>Identify all open ports</li>
             <li>Look for any unusual or unexpected services</li>
             <li>Visit the discovered service in your browser</li>

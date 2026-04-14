@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Learn Brute Force with Hydra{% endblock %}
+
+{% block content %}
+<div class="lab-container">
+    <h2>Brute Force Attack using Hydra</h2>
+    
+    <div class="description">
+        <h3>Concept</h3>
+        <p><strong>Hydra</strong> is a fast and flexible online password cracking tool. It supports numerous protocols and can be used to brute-force login forms, SSH, FTP, and many other services.</p>
+        <p style="margin-top: 1rem;">Brute-force attacks work by systematically trying every password from a wordlist until the correct one is found.</p>
+
+        <h3 style="margin-top: 2rem;">How Hydra Works</h3>
+        <p>Hydra sends login attempts to a target and checks the response. If the response does <strong>not</strong> contain a specific failure message, it assumes the credentials are correct.</p>
+        <ul style="margin-top: 0.5rem; margin-left: 2rem; color: #8b949e;">
+            <li><code>-l</code> — specify the username</li>
+            <li><code>-P</code> — specify the password wordlist file</li>
+            <li><code>http-post-form</code> — attack type for web login forms</li>
+        </ul>
+
+        <h3 style="margin-top: 2rem;">Example Command</h3>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">hydra -l admin -P passwords.txt -s 5000 {{ target_host }} http-post-form "/hydra-login:username=^USER^&amp;password=^PASS^:Invalid credentials"</pre>
+        
+        <p style="margin-top: 1rem;">Breaking it down:</p>
+        <div class="output-container" style="margin-top: 0.5rem;">
+            <h4>Command Breakdown:</h4>
+            <pre class="command-output">-l admin                → target username
+-P passwords.txt        → wordlist of passwords to try
+{{ target_host }}               → target host
+http-post-form          → attack a web form via POST
+"/hydra-login            → form action URL
+:username=^USER^         → username field (^USER^ is replaced by -l value)
+&amp;password=^PASS^        → password field (^PASS^ is replaced by wordlist entries)
+:Invalid credentials"    → failure string (if response contains this, login failed)</pre>
+        </div>
+
+        <h3 style="margin-top: 2rem;">Real World Impact</h3>
+        <p>Weak passwords are one of the most common attack vectors. Brute-force tools like Hydra can compromise accounts that use simple or commonly known passwords within seconds.</p>
+
+        <h3 style="margin-top: 2rem;">Lab Instructions</h3>
+        <p><strong>Goal:</strong><br>
+        Find the correct password for the login form and retrieve the flag.</p>
+        <p><strong>Steps:</strong></p>
+        <ol style="margin-top: 1rem; margin-left: 2rem; color: #8b949e;">
+            <li>Create a password wordlist file</li>
+            <li>Run Hydra against the login endpoint</li>
+            <li>Identify the correct password from Hydra's output</li>
+            <li>Log in using the discovered credentials</li>
+            <li>Retrieve and submit the flag</li>
+        </ol>
+    </div>
+
+    <div class="lab-actions" style="margin-top: 3rem; border-top: 1px dashed #30363d; padding-top: 2rem;">
+        <a href="{{ url_for('lab_hydra') }}" class="btn">&gt; Start Lab</a>
+    </div>
+</div>
+{% endblock %}

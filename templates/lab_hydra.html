@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Hydra Brute Force Lab{% endblock %}
+
+{% block content %}
+<div class="lab-container">
+    <h2>Brute Force Attack Lab</h2>
+    <p class="description">A login form is running on this server. Use Hydra to crack the credentials.</p>
+
+    <div style="margin-top: 2rem; padding: 2rem; border: 1px solid var(--border-color); background-color: rgba(22, 27, 34, 0.5);">
+        <h3>&#9881; Lab Environment</h3>
+        <p style="margin-top: 1rem; color: #8b949e;">Login Endpoint: <code><a href="/hydra-login" style="color: #3fb950;" target="_blank">http://{{ target_host }}:5000/hydra-login</a></code></p>
+        <p style="margin-top: 0.5rem; color: #8b949e;">Username: <code>admin</code> (known)</p>
+        <p style="margin-top: 0.5rem; color: #f85149; font-style: italic;">Password: unknown — you must brute-force it.</p>
+    </div>
+
+    <div class="instructions-section" style="margin-top: 2rem;">
+        <h3>Instructions</h3>
+        
+        <p style="margin-top: 1rem;"><strong>Step 1:</strong> Create a password wordlist file called <code>passwords.txt</code>:</p>
+        <div class="output-container" style="margin-top: 0.5rem;">
+            <h4>passwords.txt</h4>
+            <pre class="command-output">123456
+admin
+letmein
+password
+password123
+qwerty
+test
+welcome</pre>
+        </div>
+        
+        <p style="margin-top: 1.5rem;"><strong>Step 2:</strong> Run Hydra against the login form:</p>
+        <pre class="command-output" style="margin: 0.5rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">hydra -l admin -P passwords.txt -s 5000 {{ target_host }} http-post-form "/hydra-login:username=^USER^&amp;password=^PASS^:Invalid credentials"</pre>
+        
+        <p style="margin-top: 1.5rem;"><strong>Step 3:</strong> Identify the correct password from Hydra's output.</p>
+        <p style="margin-top: 0.5rem; color: #8b949e;">Hydra will report something like: <code style="color: #3fb950;">[5000][http-post-form] host: {{ target_host }} login: admin password: ????</code></p>
+        
+        <p style="margin-top: 1.5rem;"><strong>Step 4:</strong> Log in using the discovered credentials:</p>
+        <p style="margin-top: 0.5rem;"><a href="/hydra-login" class="btn btn-secondary" target="_blank">&gt; Open Login Page</a></p>
+        
+        <p style="margin-top: 1.5rem;"><strong>Step 5:</strong> Retrieve the flag and submit it below.</p>
+    </div>
+
+    <div style="margin-top: 2rem; padding: 1.5rem; border: 1px dashed #d29922; background-color: rgba(210, 153, 34, 0.05); border-radius: 4px;">
+        <p style="color: #d29922;"><strong>&#9888; Note:</strong> You must have <a href="https://github.com/vanhauser-thc/thc-hydra" style="color: #58a6ff;" target="_blank">Hydra</a> installed on your system to complete this lab.</p>
+        <p style="margin-top: 0.5rem; color: #8b949e;">On Kali Linux it is pre-installed. On other systems, install via your package manager.</p>
+    </div>
+
+    <!-- Flag Submission Form -->
+    <div class="submit-section" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px dashed var(--border-color);">
+        <h3>Submit Flag</h3>
+        <form action="{{ url_for('submit_hydra') }}" method="POST" class="lab-form">
+            <input type="text" name="flag" placeholder="Enter flag here" class="input-field" required>
+            <button type="submit" class="btn btn-secondary">Submit</button>
+        </form>
+        
+        {% if flag_result %}
+        <div class="result-message {% if 'Correct' in flag_result %}success{% else %}error{% endif %}">
+            <strong>{{ flag_result }}</strong>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

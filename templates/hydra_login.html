@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="lab-container" style="max-width: 450px; margin: 3rem auto;">
+    <h2>&#128274; Login</h2>
+    <p class="description">Enter your credentials to access the system.</p>
+
+    {% if success %}
+    <div class="result-message success" style="margin-top: 2rem;">
+        <p style="font-size: 1.2rem; margin-bottom: 1rem;"><strong>Login Successful</strong></p>
+        <div style="padding: 1rem; background-color: #000; border: 1px dashed #3fb950; text-align: center;">
+            <p style="color: #8b949e; margin-bottom: 0.5rem; font-size: 0.85rem;">FLAG:</p>
+            <code style="color: #3fb950; font-size: 1.3rem; font-weight: bold;">{{ flag }}</code>
+        </div>
+    </div>
+    {% else %}
+    <form action="/hydra-login" method="POST" style="margin-top: 2rem;">
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; color: #8b949e;">Username:</label>
+            <input type="text" name="username" class="input-field" style="width: 100%;" placeholder="Username" required>
+        </div>
+        <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; color: #8b949e;">Password:</label>
+            <input type="password" name="password" class="input-field" style="width: 100%;" placeholder="Password" required>
+        </div>
+        
+        {% if error %}
+        <div class="result-message error" style="margin-bottom: 1.5rem;">
+            <strong>{{ error }}</strong>
+        </div>
+        {% endif %}
+        
+        <button type="submit" class="btn" style="width: 100%; text-align: center;">Login</button>
+    </form>
+    {% endif %}
+
+    <div style="margin-top: 2rem; text-align: center;">
+        <a href="{{ url_for('lab_hydra') }}" style="color: #8b949e; font-size: 0.85rem;">&lt; Back to Lab</a>
+    </div>
+</div>
+{% endblock %}

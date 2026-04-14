@@ -9,7 +9,7 @@
 
     <div style="margin-top: 2rem; padding: 2rem; border: 1px solid var(--border-color); background-color: rgba(22, 27, 34, 0.5);">
         <h3>&#9881; Lab Environment</h3>
-        <p style="margin-top: 1rem; color: #8b949e;">The ThreatLab platform is running on <code>http://127.0.0.1:5000</code></p>
+        <p style="margin-top: 1rem; color: #8b949e;">The ThreatLab platform is running on <code>http://{{ target_host }}:5000</code></p>
         <p style="margin-top: 0.5rem; color: #8b949e;">There may be other services running on this machine that are not linked from this website.</p>
         <p style="margin-top: 0.5rem; color: #f85149; font-style: italic;">Your job is to find them.</p>
     </div>
@@ -17,14 +17,14 @@
     <div class="instructions-section" style="margin-top: 2rem;">
         <h3>Instructions</h3>
         <p><strong>Step 1:</strong> Open your terminal and run:</p>
-        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">nmap 127.0.0.1</pre>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">nmap {{ target_host }}</pre>
         
         <p style="margin-top: 1rem;"><strong>Step 2:</strong> Identify open ports in the scan results.</p>
         
         <p style="margin-top: 1rem;"><strong>Step 3:</strong> Look for any unusual or unexpected services.</p>
         
         <p style="margin-top: 1rem;"><strong>Step 4:</strong> Visit the discovered service in your browser.</p>
-        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #d29922; background: #000;">http://127.0.0.1:&lt;discovered_port&gt;</pre>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #d29922; background: #000;">http://{{ target_host }}:&lt;discovered_port&gt;</pre>
         
         <p style="margin-top: 1rem;"><strong>Step 5:</strong> Retrieve the flag and submit it below.</p>
     </div>

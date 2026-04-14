@@ -3,6 +3,12 @@ import os
 
 app = Flask(__name__)
 
+TARGET_HOST = os.getenv("TARGET_HOST", "127.0.0.1")
+
+@app.context_processor
+def inject_target_host():
+    return dict(target_host=TARGET_HOST)
+
 @app.route('/')
 @app.route('/dashboard')
 def dashboard():
@@ -142,6 +148,38 @@ def submit_nmap():
     else:
         flag_result = "Incorrect flag."
     return render_template('lab_nmap.html', flag_result=flag_result)
+
+# --- Hydra Brute Force Lab ---
+
+@app.route('/learn/hydra')
+def learn_hydra():
+    return render_template('learn_hydra.html')
+
+@app.route('/lab/hydra')
+def lab_hydra():
+    return render_template('lab_hydra.html')
+
+@app.route('/hydra-login', methods=['GET', 'POST'])
+def hydra_login():
+    if request.method == 'GET':
+        return render_template('hydra_login.html')
+    
+    username = request.form.get('username', '')
+    password = request.form.get('password', '')
+    
+    if username == 'admin' and password == 'password123':
+        return render_template('hydra_login.html', success=True, flag='flag{hydra_master}')
+    
+    return render_template('hydra_login.html', error='Invalid credentials')
+
+@app.route('/submit-hydra', methods=['POST'])
+def submit_hydra():
+    flag = request.form.get('flag')
+    if flag == "flag{hydra_master}":
+        flag_result = "Correct! Hydra Brute Force Lab Completed!"
+    else:
+        flag_result = "Incorrect flag."
+    return render_template('lab_hydra.html', flag_result=flag_result)
 
 if __name__ == '__main__':
     app.run(debug=True)
