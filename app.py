@@ -181,5 +181,130 @@ def submit_hydra():
         flag_result = "Incorrect flag."
     return render_template('lab_hydra.html', flag_result=flag_result)
 
+# --- SQL Injection (sqlmap) Lab ---
+
+@app.route('/learn/sqlmap')
+def learn_sqlmap():
+    return render_template('learn_sqlmap.html')
+
+@app.route('/lab/sqlmap')
+def lab_sqlmap():
+    return render_template('lab_sqlmap.html')
+
+# --- Initialize vulnerable SQLite database ---
+import sqlite3
+
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lab.db')
+
+def init_db():
+    """Create the vulnerable database with seed data."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("DROP TABLE IF EXISTS products")
+    c.execute("DROP TABLE IF EXISTS users")
+    c.execute("""
+        CREATE TABLE products (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            description TEXT NOT NULL
+        )
+    """)
+    c.execute("""
+        CREATE TABLE users (
+            id INTEGER PRIMARY KEY,
+            username TEXT NOT NULL,
+            password TEXT NOT NULL,
+            notes TEXT
+        )
+    """)
+    # Seed products
+    c.executemany("INSERT INTO products VALUES (?, ?, ?)", [
+        (1, 'Laptop',      'High performance office laptop'),
+        (2, 'Phone',       'Android smartphone device'),
+        (3, 'Tablet',      'Portable tablet for browsing'),
+        (4, 'Monitor',     'Ultra-wide curved display'),
+        (5, 'Admin Panel', 'Secret admin access portal'),
+    ])
+    # Seed users (contains the flag)
+    c.executemany("INSERT INTO users VALUES (?, ?, ?, ?)", [
+        (1, 'admin',  'password123',   'flag{sqlmap_master}'),
+        (2, 'guest',  'guest',         'no access'),
+        (3, 'editor', 'editor2024',    'content manager'),
+    ])
+    conn.commit()
+    conn.close()
+
+# Initialize database on startup
+init_db()
+
+
+@app.route('/search')
+def search():
+    product_id = request.args.get('id', '')
+
+    if not product_id:
+        return """<!DOCTYPE html>
+<html><head><title>Search</title></head>
+<body><h1>Product Search</h1>
+<div id="result"><p>Please provide an id parameter. Example: /search?id=1</p></div>
+</body></html>"""
+
+    # INTENTIONALLY VULNERABLE: raw string formatting, NO parameterized query
+    query = f"SELECT id, name, description FROM products WHERE id = {product_id}"
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.text_factory = str
+    cursor = conn.cursor()
+
+    rows = []
+    error = None
+
+    try:
+        rows = cursor.execute(query).fetchall()
+    except Exception as e:
+        error = str(e)
+    finally:
+        conn.close()
+
+    # Build HTML response
+    if error:
+        result_html = f"""<div id="result">
+<p>No results found.</p>
+<!-- SQL Error: {error} -->
+<p style="color:gray;font-size:12px;">Error: {error}</p>
+</div>"""
+    elif rows:
+        table_rows = ""
+        for row in rows:
+            table_rows += f"<tr><td>{row[0]}</td><td>{row[1]}</td><td>{row[2]}</td></tr>\n"
+        result_html = f"""<div id="result">
+<h4>Query Results:</h4>
+<table border="1" cellpadding="8" cellspacing="0">
+<tr><th>ID</th><th>Name</th><th>Description</th></tr>
+{table_rows}</table>
+<p>{len(rows)} row(s) returned.</p>
+</div>"""
+    else:
+        result_html = """<div id="result">
+<p>No results found.</p>
+</div>"""
+
+    return f"""<!DOCTYPE html>
+<html><head><title>Search Results</title></head>
+<body>
+<h1>Product Search</h1>
+{result_html}
+</body>
+</html>"""
+
+@app.route('/submit-sqlmap', methods=['POST'])
+def submit_sqlmap():
+    flag = request.form.get('flag')
+    if flag == "flag{sqlmap_master}":
+        flag_result = "Correct! SQL Injection Lab Completed!"
+    else:
+        flag_result = "Incorrect flag."
+    return render_template('lab_sqlmap.html', flag_result=flag_result)
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000, debug=True)

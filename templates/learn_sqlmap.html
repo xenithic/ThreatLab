@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Learn SQL Injection{% endblock %}
+
+{% block content %}
+<div class="lab-container">
+    <h2>SQL Injection using sqlmap</h2>
+    
+    <div class="description">
+        <h3>Concept</h3>
+        <p><strong>SQL Injection</strong> is a web vulnerability that allows attackers to interfere with database queries by injecting malicious SQL code through user input.</p>
+        <p style="margin-top: 1rem;">When user input is directly concatenated into an SQL query without sanitization, attackers can manipulate the query to:</p>
+        <ul style="margin-top: 0.5rem; margin-left: 2rem; color: #8b949e;">
+            <li>Bypass authentication</li>
+            <li>Read sensitive data from the database</li>
+            <li>Modify or delete data</li>
+            <li>Execute administrative operations</li>
+        </ul>
+
+        <h3 style="margin-top: 2rem;">Vulnerable Code Example</h3>
+        <p>Consider this backend query:</p>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #f85149; background: #000;">query = "SELECT * FROM products WHERE id = " + user_input</pre>
+        <p>If the user supplies <code>1 OR 1=1</code>, the query becomes:</p>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #f85149; background: #000;">SELECT * FROM products WHERE id = 1 OR 1=1</pre>
+        <p>This returns <strong>all rows</strong> from the table because <code>1=1</code> is always true.</p>
+
+        <h3 style="margin-top: 2rem;">What is sqlmap?</h3>
+        <p><strong>sqlmap</strong> is an open-source penetration testing tool that automates the detection and exploitation of SQL injection vulnerabilities.</p>
+        <p style="margin-top: 1rem;">It can:</p>
+        <ul style="margin-top: 0.5rem; margin-left: 2rem; color: #8b949e;">
+            <li>Detect injection points automatically</li>
+            <li>Enumerate databases, tables, and columns</li>
+            <li>Dump database contents</li>
+            <li>Attempt OS-level access in severe cases</li>
+        </ul>
+
+        <h3 style="margin-top: 2rem;">Example Commands</h3>
+        <p>Basic detection scan:</p>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">sqlmap -u "http://{{ target_host }}:5000/search?id=1"</pre>
+        <p>Dump all data:</p>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">sqlmap -u "http://{{ target_host }}:5000/search?id=1" --dump</pre>
+
+        <h3 style="margin-top: 2rem;">Types of SQL Injection</h3>
+        <div class="output-container" style="margin-top: 0.5rem;">
+            <h4>Common Techniques:</h4>
+            <pre class="command-output">Tautology:    1 OR 1=1           → returns all rows
+UNION-based:  1 UNION SELECT ...  → extracts data from other tables
+Error-based:  1'                  → triggers error revealing DB info
+Blind SQLi:   1 AND 1=1           → true/false responses leak data</pre>
+        </div>
+
+        <h3 style="margin-top: 2rem;">Real World Impact</h3>
+        <p>SQL injection has been responsible for some of the largest data breaches in history, exposing millions of user credentials, payment details, and personal information.</p>
+
+        <h3 style="margin-top: 2rem;">Lab Instructions</h3>
+        <p><strong>Goal:</strong><br>
+        Find and exploit a SQL injection vulnerability to retrieve the hidden flag.</p>
+        <p><strong>Steps:</strong></p>
+        <ol style="margin-top: 1rem; margin-left: 2rem; color: #8b949e;">
+            <li>Visit the vulnerable search endpoint</li>
+            <li>Try manual injection payloads</li>
+            <li>Use sqlmap to automate the exploitation</li>
+            <li>Extract the flag from the dumped data</li>
+            <li>Submit the flag</li>
+        </ol>
+    </div>
+
+    <div class="lab-actions" style="margin-top: 3rem; border-top: 1px dashed #30363d; padding-top: 2rem;">
+        <a href="{{ url_for('lab_sqlmap') }}" class="btn">&gt; Start Lab</a>
+    </div>
+</div>
+{% endblock %}
