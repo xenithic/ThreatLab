@@ -1,22 +1,181 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session, jsonify
 import os
+import sqlite3
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)
 
 TARGET_HOST = os.getenv("TARGET_HOST", "127.0.0.1")
+
+# --- Gamification: Flags & Points ---
+
+FLAGS = {
+    "hydra": "flag{hydra_master}",
+    "sqlmap": "flag{sqlmap_master}",
+    "dir_enum": "flag{dir_enum_pro}",
+    "command_injection": "flag{cmd_injection}",
+    "broken_auth": "flag{auth_bypass}",
+    "data_exposure": "flag{data_exposed}",
+    "nmap": "flag{nmap_master}",
+}
+
+POINTS = {
+    "hydra": 150,
+    "sqlmap": 150,
+    "dir_enum": 50,
+    "command_injection": 100,
+    "broken_auth": 75,
+    "data_exposure": 75,
+    "nmap": 100,
+}
+
+TOTAL_LABS = 7
+
+# --- Database helpers ---
+
+PROGRESS_DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'database.db')
+
+def get_db():
+    conn = sqlite3.connect(PROGRESS_DB)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def init_progress_db():
+    conn = get_db()
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS progress (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT,
+            lab TEXT,
+            completed INTEGER,
+            points INTEGER
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+init_progress_db()
+
+def is_lab_completed(username, lab):
+    conn = get_db()
+    try:
+        row = conn.execute(
+            "SELECT id FROM progress WHERE username = ? AND lab = ? AND completed = 1",
+            (username, lab)
+        ).fetchone()
+        return row is not None
+    except Exception:
+        return False
+    finally:
+        conn.close()
+
+def get_user_stats(username):
+    conn = get_db()
+    try:
+        row = conn.execute(
+            "SELECT COALESCE(SUM(points), 0) AS total_points, COUNT(*) AS completed_labs FROM progress WHERE username = ? AND completed = 1",
+            (username,)
+        ).fetchone()
+        return {
+            "total_points": row["total_points"],
+            "completed_labs": row["completed_labs"],
+        }
+    except Exception:
+        return {"total_points": 0, "completed_labs": 0}
+    finally:
+        conn.close()
+
+# --- Context processor ---
 
 @app.context_processor
 def inject_target_host():
     return dict(target_host=TARGET_HOST)
 
+# --- Auto-assign session username ---
+
+@app.before_request
+def ensure_session_username():
+    if "username" not in session:
+        session["username"] = "user1"
+
+# --- Dashboard ---
+
 @app.route('/')
 @app.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html')
+    username = session.get("username")
+    stats = get_user_stats(username)
+    return render_template(
+        'dashboard.html',
+        total_points=stats["total_points"],
+        completed_labs=stats["completed_labs"],
+        total_labs=TOTAL_LABS,
+    )
+
+# --- Unified flag submission (JSON) ---
+
+@app.route('/submit-flag', methods=['POST'])
+def submit_flag_unified():
+    username = session.get("username")
+    lab = request.form.get("lab", "")
+    flag = request.form.get("flag", "")
+
+    correct_flag = FLAGS.get(lab)
+    if correct_flag is None:
+        return jsonify({"status": "error", "message": "Unknown lab"}), 400
+
+    if flag != correct_flag:
+        return jsonify({"status": "wrong", "message": "Incorrect flag"})
+
+    if is_lab_completed(username, lab):
+        return jsonify({"status": "already_completed", "message": "Already solved", "points": 0})
+
+    points = POINTS.get(lab, 0)
+    conn = get_db()
+    try:
+        conn.execute(
+            "INSERT INTO progress (username, lab, completed, points) VALUES (?, ?, 1, ?)",
+            (username, lab, points)
+        )
+        conn.commit()
+    except Exception:
+        return jsonify({"status": "error", "message": "Database error"}), 500
+    finally:
+        conn.close()
+
+    return jsonify({"status": "success", "message": "Correct flag!", "points": points})
+
+# --- Learn routes ---
 
 @app.route('/learn/command-injection')
 def learn_command_injection():
     return render_template('learn_command_injection.html')
+
+@app.route('/learn/directory-enumeration')
+def learn_directory_enum():
+    return render_template('learn_directory_enum.html')
+
+@app.route('/learn/broken-auth')
+def learn_broken_auth():
+    return render_template('learn_broken_auth.html')
+
+@app.route('/learn/data-exposure')
+def learn_data_exposure():
+    return render_template('learn_data_exposure.html')
+
+@app.route('/learn/nmap')
+def learn_nmap():
+    return render_template('learn_nmap.html')
+
+@app.route('/learn/hydra')
+def learn_hydra():
+    return render_template('learn_hydra.html')
+
+@app.route('/learn/sqlmap')
+def learn_sqlmap():
+    return render_template('learn_sqlmap.html')
+
+# --- Command Injection Lab ---
 
 @app.route('/lab/command-injection', methods=['GET', 'POST'])
 def lab_command_injection():
@@ -38,8 +197,9 @@ def lab_command_injection():
                 output = str(e)
     return render_template('lab_command_injection.html', output=output)
 
-@app.route('/submit-flag', methods=['POST'])
-def submit_flag():
+# Old per-lab flag route (kept for backward compatibility)
+@app.route('/submit-cmd-flag', methods=['POST'])
+def submit_cmd_flag():
     flag = request.form.get('flag')
     if flag == "flag{command_injection_master}":
         flag_result = "Correct! Lab Completed!"
@@ -47,9 +207,7 @@ def submit_flag():
         flag_result = "Incorrect flag."
     return render_template('lab_command_injection.html', flag_result=flag_result)
 
-@app.route('/learn/directory-enumeration')
-def learn_directory_enum():
-    return render_template('learn_directory_enum.html')
+# --- Directory Enumeration Lab ---
 
 @app.route('/lab/directory-enumeration')
 def lab_directory_enum():
@@ -78,10 +236,6 @@ def submit_directory_flag():
 
 # --- Broken Authentication Lab ---
 
-@app.route('/learn/broken-auth')
-def learn_broken_auth():
-    return render_template('learn_broken_auth.html')
-
 @app.route('/lab/broken-auth')
 def lab_broken_auth():
     return render_template('lab_broken_auth.html')
@@ -104,10 +258,6 @@ def submit_broken_auth():
     return render_template('lab_broken_auth.html', flag_result=flag_result)
 
 # --- Sensitive Data Exposure Lab ---
-
-@app.route('/learn/data-exposure')
-def learn_data_exposure():
-    return render_template('learn_data_exposure.html')
 
 @app.route('/lab/data-exposure')
 def lab_data_exposure():
@@ -132,10 +282,6 @@ def submit_data_exposure():
 
 # --- Nmap Network Scanning Lab ---
 
-@app.route('/learn/nmap')
-def learn_nmap():
-    return render_template('learn_nmap.html')
-
 @app.route('/lab/nmap')
 def lab_nmap():
     return render_template('lab_nmap.html')
@@ -150,10 +296,6 @@ def submit_nmap():
     return render_template('lab_nmap.html', flag_result=flag_result)
 
 # --- Hydra Brute Force Lab ---
-
-@app.route('/learn/hydra')
-def learn_hydra():
-    return render_template('learn_hydra.html')
 
 @app.route('/lab/hydra')
 def lab_hydra():
@@ -183,16 +325,11 @@ def submit_hydra():
 
 # --- SQL Injection (sqlmap) Lab ---
 
-@app.route('/learn/sqlmap')
-def learn_sqlmap():
-    return render_template('learn_sqlmap.html')
-
 @app.route('/lab/sqlmap')
 def lab_sqlmap():
     return render_template('lab_sqlmap.html')
 
 # --- Initialize vulnerable SQLite database ---
-import sqlite3
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lab.db')
 

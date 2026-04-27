@@ -5,6 +5,30 @@
 {% block content %}
 <div class="dashboard-container">
     <h2>Welcome to ThreatLab</h2>
+
+    <!-- Stats Panel -->
+    <div class="stats-panel">
+        <div class="stat-card">
+            <span class="stat-value">{{ total_points }}</span>
+            <span class="stat-label">Points</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value">{{ completed_labs }} / {{ total_labs }}</span>
+            <span class="stat-label">Labs Completed</span>
+        </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-section">
+        <div class="progress-header">
+            <span>Progress</span>
+            <span>{% if total_labs > 0 %}{{ ((completed_labs / total_labs) * 100) | round(0) | int }}%{% else %}0%{% endif %}</span>
+        </div>
+        <div class="progress-bar-track">
+            <div class="progress-bar-fill" style="width: {% if total_labs > 0 %}{{ ((completed_labs / total_labs) * 100) | round(0) | int }}{% else %}0{% endif %}%;"></div>
+        </div>
+    </div>
+
     <h3 style="margin-top: 1.5rem;">Available Labs</h3>
 
     <h3 style="margin-top: 1.5rem; color: #3fb950;">Easy</h3>
