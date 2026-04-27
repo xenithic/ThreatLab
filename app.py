@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, jsonify
+from flask import Flask, render_template, request, session, jsonify, redirect, url_for
 import os
 import sqlite3
 
@@ -40,9 +40,17 @@ def get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
-def init_progress_db():
+def init_db():
     conn = get_db()
-    conn.execute("""
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE,
+            password TEXT
+        )
+    """)
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS progress (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT,
@@ -54,7 +62,7 @@ def init_progress_db():
     conn.commit()
     conn.close()
 
-init_progress_db()
+init_db()
 
 def is_lab_completed(username, lab):
     conn = get_db()
@@ -91,24 +99,82 @@ def get_user_stats(username):
 def inject_target_host():
     return dict(target_host=TARGET_HOST)
 
-# --- Auto-assign session username ---
+# --- Auth: login required check ---
+
+PUBLIC_ENDPOINTS = {'login', 'register', 'static', 'submit_flag_unified'}
 
 @app.before_request
-def ensure_session_username():
-    if "username" not in session:
-        session["username"] = "user1"
+def require_login():
+    if request.endpoint not in PUBLIC_ENDPOINTS and 'username' not in session:
+        return redirect(url_for('login'))
+
+# --- Auth routes ---
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    error = None
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        if not username or not password:
+            error = 'Username and password are required.'
+        else:
+            conn = get_db()
+            try:
+                existing = conn.execute(
+                    'SELECT id FROM users WHERE username = ?', (username,)
+                ).fetchone()
+                if existing:
+                    error = 'Username already exists.'
+                else:
+                    conn.execute(
+                        'INSERT INTO users (username, password) VALUES (?, ?)',
+                        (username, password)
+                    )
+                    conn.commit()
+                    return redirect(url_for('login'))
+            finally:
+                conn.close()
+    return render_template('register.html', error=error)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        conn = get_db()
+        try:
+            user = conn.execute(
+                'SELECT id FROM users WHERE username = ? AND password = ?',
+                (username, password)
+            ).fetchone()
+        finally:
+            conn.close()
+        if user:
+            session['username'] = username
+            return redirect(url_for('dashboard'))
+        else:
+            error = 'Invalid username or password.'
+    return render_template('login.html', error=error)
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
 
 # --- Dashboard ---
 
 @app.route('/')
 @app.route('/dashboard')
 def dashboard():
-    username = session.get("username")
+    username = session.get('username')
     stats = get_user_stats(username)
     return render_template(
         'dashboard.html',
-        total_points=stats["total_points"],
-        completed_labs=stats["completed_labs"],
+        username=username,
+        total_points=stats['total_points'],
+        completed_labs=stats['completed_labs'],
         total_labs=TOTAL_LABS,
     )
 
@@ -117,6 +183,9 @@ def dashboard():
 @app.route('/submit-flag', methods=['POST'])
 def submit_flag_unified():
     username = session.get("username")
+    if not username:
+        return jsonify({"status": "error", "message": "Authentication required"}), 401
+
     lab = request.form.get("lab", "")
     flag = request.form.get("flag", "")
 

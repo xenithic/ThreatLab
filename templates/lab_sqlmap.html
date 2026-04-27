@@ -45,7 +45,7 @@ http://{{ target_host }}:5000/search?id=1 UNION SELECT 1,2,3</pre>
         <h3>🏁 Submit Flag</h3>
         <div class="flag-form-inline">
             <input type="text" id="flag" placeholder="Enter flag here" class="input-field">
-            <button class="btn btn-secondary" onclick="submitFlag('sqlmap')">Submit</button>
+            <button id="submit-btn" class="btn btn-secondary" onclick="submitFlag('sqlmap')">Submit</button>
         </div>
         <div id="flag-result"></div>
     </div>
@@ -54,7 +54,7 @@ http://{{ target_host }}:5000/search?id=1 UNION SELECT 1,2,3</pre>
 <script>
 function submitFlag(lab) {
     const flag = document.getElementById("flag").value;
-    const btn = document.querySelector(".flag-submit-section button");
+    const btn = document.getElementById("submit-btn");
     btn.disabled = true;
     fetch("/submit-flag", {
         method: "POST",

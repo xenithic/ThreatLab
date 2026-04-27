@@ -52,7 +52,7 @@ welcome</pre>
         <h3>🏁 Submit Flag</h3>
         <div class="flag-form-inline">
             <input type="text" id="flag" placeholder="Enter flag here" class="input-field">
-            <button class="btn btn-secondary" onclick="submitFlag('hydra')">Submit</button>
+            <button id="submit-btn" class="btn btn-secondary" onclick="submitFlag('hydra')">Submit</button>
         </div>
         <div id="flag-result"></div>
     </div>
@@ -61,7 +61,7 @@ welcome</pre>
 <script>
 function submitFlag(lab) {
     const flag = document.getElementById("flag").value;
-    const btn = document.querySelector(".flag-submit-section button");
+    const btn = document.getElementById("submit-btn");
     btn.disabled = true;
     fetch("/submit-flag", {
         method: "POST",
