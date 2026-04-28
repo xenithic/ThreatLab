@@ -429,3 +429,72 @@ h2, h3 {
 .auth-footer a:hover {
     text-decoration: underline;
 }
+
+/* --- Badges --- */
+
+.badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.badge {
+    text-align: center;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #1e1e1e;
+    border: 1px solid var(--border-color);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.badge:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 12px rgba(63, 185, 80, 0.15);
+}
+
+.badge img {
+    width: 60px;
+    height: 60px;
+}
+
+.badge p {
+    margin-top: 5px;
+    font-size: 14px;
+    color: var(--text-color);
+}
+
+/* --- Hint Box --- */
+
+.hint-box {
+    margin-top: 2rem;
+    padding: 1rem 1.5rem;
+    border: 1px dashed #58a6ff;
+    border-radius: 4px;
+    background-color: rgba(88, 166, 255, 0.05);
+    color: #8b949e;
+    font-size: 0.95rem;
+}
+
+.hint-box strong {
+    color: #58a6ff;
+}
+
+.hint-box code {
+    color: #3fb950;
+}
+
+/* --- Flag Display Box --- */
+
+.flag-box {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background-color: #000;
+    border: 1px dashed var(--primary-color);
+    border-radius: 4px;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    font-weight: bold;
+    font-family: 'Courier New', Courier, monospace;
+    margin-top: 1rem;
+}

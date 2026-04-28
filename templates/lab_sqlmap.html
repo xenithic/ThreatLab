@@ -40,6 +40,10 @@ http://{{ target_host }}:5000/search?id=1 UNION SELECT 1,2,3</pre>
         <p style="margin-top: 0.5rem; color: #8b949e;">On Kali Linux it is pre-installed. Otherwise: <code>pip install sqlmap</code> or clone from GitHub.</p>
     </div>
 
+    <div class="hint-box">
+        <p>💡 <strong>Hint:</strong> The search endpoint is vulnerable to SQL injection. Use sqlmap with <code>--dump</code> to extract all database tables — the flag is stored in a user's notes.</p>
+    </div>
+
     <!-- Flag Submission (AJAX) -->
     <div class="flag-submit-section">
         <h3>🏁 Submit Flag</h3>

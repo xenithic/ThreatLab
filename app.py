@@ -31,6 +31,16 @@ POINTS = {
 
 TOTAL_LABS = 7
 
+BADGES = {
+    "hydra": {"name": "Brute Force Master", "icon": "hydra.png"},
+    "sqlmap": {"name": "SQL Injection Expert", "icon": "sqlmap.png"},
+    "dir_enum": {"name": "Recon Rookie", "icon": "dir.png"},
+    "command_injection": {"name": "Command Hacker", "icon": "cmd.png"},
+    "nmap": {"name": "Network Explorer", "icon": "nmap.png"},
+    "broken_auth": {"name": "Auth Breaker", "icon": "auth.png"},
+    "data_exposure": {"name": "Data Sniffer", "icon": "data.png"},
+}
+
 # --- Database helpers ---
 
 PROGRESS_DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'database.db')
@@ -92,6 +102,24 @@ def get_user_stats(username):
         return {"total_points": 0, "completed_labs": 0}
     finally:
         conn.close()
+
+def get_user_badges(username):
+    conn = get_db()
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT lab FROM progress WHERE username = ? AND completed = 1",
+            (username,)
+        )
+        completed_labs = [row[0] for row in cursor.fetchall()]
+    finally:
+        conn.close()
+
+    badges = []
+    for lab in completed_labs:
+        if lab in BADGES:
+            badges.append(BADGES[lab])
+    return badges
 
 # --- Context processor ---
 
@@ -170,12 +198,14 @@ def logout():
 def dashboard():
     username = session.get('username')
     stats = get_user_stats(username)
+    badges = get_user_badges(username)
     return render_template(
         'dashboard.html',
         username=username,
         total_points=stats['total_points'],
         completed_labs=stats['completed_labs'],
         total_labs=TOTAL_LABS,
+        badges=badges,
     )
 
 # --- Unified flag submission (JSON) ---
@@ -270,7 +300,7 @@ def lab_command_injection():
 @app.route('/submit-cmd-flag', methods=['POST'])
 def submit_cmd_flag():
     flag = request.form.get('flag')
-    if flag == "flag{command_injection_master}":
+    if flag == "flag{cmd_injection}":
         flag_result = "Correct! Lab Completed!"
     else:
         flag_result = "Incorrect flag."
@@ -297,7 +327,7 @@ def admin_panel():
 @app.route('/submit-directory-flag', methods=['POST'])
 def submit_directory_flag():
     flag = request.form.get('flag')
-    if flag == "flag{directory_master}":
+    if flag == "flag{dir_enum_pro}":
         flag_result = "Correct! Directory Enumeration Lab Completed!"
     else:
         flag_result = "Incorrect flag."

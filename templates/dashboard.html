@@ -29,6 +29,21 @@
         </div>
     </div>
 
+    <!-- Badges -->
+    <h3 style="margin-top: 1.5rem;">Your Badges</h3>
+    <div class="badges">
+        {% if badges %}
+            {% for badge in badges %}
+            <div class="badge">
+                <img src="{{ url_for('static', filename='badges/' + badge.icon) }}" alt="{{ badge.name }}">
+                <p>{{ badge.name }}</p>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="placeholder-text">No badges earned yet.</p>
+        {% endif %}
+    </div>
+
     <h3 style="margin-top: 1.5rem;">Available Labs</h3>
 
     <h3 style="margin-top: 1.5rem; color: #3fb950;">Easy</h3>
