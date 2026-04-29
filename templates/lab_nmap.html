@@ -5,33 +5,72 @@
 {% block content %}
 <div class="lab-container">
     <h2>Network Scanning Lab</h2>
-    <p class="description">A hidden service is running somewhere on this machine. Use Nmap to find it.</p>
+    <p class="description">A hidden service is running somewhere on this machine. Use the built-in Nmap terminal to find it.</p>
 
-    <div style="margin-top: 2rem; padding: 2rem; border: 1px solid var(--border-color); background-color: rgba(22, 27, 34, 0.5);">
+    <div class="lab-env-panel">
         <h3>&#9881; Lab Environment</h3>
-        <p style="margin-top: 1rem; color: #8b949e;">The ThreatLab platform is running on <code>http://{{ target_host }}:5000</code></p>
-        <p style="margin-top: 0.5rem; color: #8b949e;">There may be other services running on this machine that are not linked from this website.</p>
-        <p style="margin-top: 0.5rem; color: #f85149; font-style: italic;">Your job is to find them.</p>
+        <div class="env-details">
+            <div class="env-row">
+                <span class="env-label">Target</span>
+                <code class="env-value" id="target-display">{{ target_host }}</code>
+            </div>
+            <div class="env-row">
+                <span class="env-label">Mode</span>
+                <code class="env-value">Local</code>
+            </div>
+            <div class="env-row">
+                <span class="env-label">Status</span>
+                <span class="env-value env-status" id="lab-status">● Ready</span>
+            </div>
+        </div>
     </div>
 
     <div class="instructions-section" style="margin-top: 2rem;">
         <h3>Instructions</h3>
-        <p><strong>Step 1:</strong> Open your terminal and run:</p>
-        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">nmap {{ target_host }}</pre>
-        
+        <p><strong>Step 1:</strong> Use the terminal below to run an Nmap scan:</p>
+        <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #3fb950; background: #000;">nmap -sV</pre>
+        <p style="color: #8b949e; font-size: 0.85rem; margin-top: 0.25rem;">
+            The target <code>{{ target_host }}</code> is injected automatically — you do <strong>not</strong> need to type it.
+        </p>
+
         <p style="margin-top: 1rem;"><strong>Step 2:</strong> Identify open ports in the scan results.</p>
-        
+
         <p style="margin-top: 1rem;"><strong>Step 3:</strong> Look for any unusual or unexpected services.</p>
-        
+
         <p style="margin-top: 1rem;"><strong>Step 4:</strong> Visit the discovered service in your browser.</p>
         <pre class="command-output" style="margin: 1rem 0; display: block; border-left: 3px solid #d29922; background: #000;">http://{{ target_host }}:&lt;discovered_port&gt;</pre>
-        
+
         <p style="margin-top: 1rem;"><strong>Step 5:</strong> Retrieve the flag and submit it below.</p>
     </div>
 
+    <!-- Terminal UI -->
+    <div class="terminal-section">
+        <div class="terminal-header">
+            <span class="terminal-dots">
+                <span class="dot dot-red"></span>
+                <span class="dot dot-yellow"></span>
+                <span class="dot dot-green"></span>
+            </span>
+            <span class="terminal-title">nmap &mdash; {{ target_host }}</span>
+        </div>
+        <div class="terminal-body">
+            <pre id="terminal-output" class="terminal-output">Welcome to ThreatLab Nmap Terminal
+Target: {{ target_host }}
+Type an nmap command and press Enter or click Run.
+──────────────────────────────────────────────
+</pre>
+            <div class="terminal-input-row">
+                <span class="terminal-prompt">$&nbsp;</span>
+                <textarea id="terminal-input" class="terminal-input" rows="1" placeholder="nmap -sV" spellcheck="false"></textarea>
+                <button id="run-btn" class="btn terminal-run-btn" onclick="runCommand()">Run ▶</button>
+            </div>
+        </div>
+    </div>
+
     <div style="margin-top: 2rem; padding: 1.5rem; border: 1px dashed #d29922; background-color: rgba(210, 153, 34, 0.05); border-radius: 4px;">
-        <p style="color: #d29922;"><strong>&#9888; Important:</strong> Make sure <code>service_app.py</code> is running before you begin scanning.</p>
-        <p style="margin-top: 0.5rem; color: #8b949e;">In a separate terminal, run:</p>
+        <p style="color: #d29922;"><strong>&#9888; Prerequisites:</strong></p>
+        <p style="margin-top: 0.5rem; color: #8b949e;">1. <code>nmap</code> must be installed and available in your PATH.</p>
+        <p style="margin-top: 0.5rem; color: #8b949e;">2. Run <code>service_app.py</code> in a separate terminal before scanning:</p>
         <pre class="command-output" style="margin: 0.5rem 0; display: block; border-left: 3px solid #d29922; background: #000;">python service_app.py</pre>
     </div>
 
@@ -51,6 +90,66 @@
 </div>
 
 <script>
+// --- Terminal command execution ---
+function runCommand() {
+    const input = document.getElementById("terminal-input");
+    const output = document.getElementById("terminal-output");
+    const btn = document.getElementById("run-btn");
+    const status = document.getElementById("lab-status");
+    const command = input.value.trim();
+
+    if (!command) {
+        appendOutput("❌ Enter a command\n");
+        return;
+    }
+
+    // Show what the user typed
+    appendOutput("$ " + command + "\n");
+    input.value = "";
+
+    // Disable UI during execution
+    btn.disabled = true;
+    btn.textContent = "Running…";
+    status.textContent = "● Executing…";
+    status.style.color = "#d29922";
+
+    fetch("/run-command", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lab: "nmap", command: command })
+    })
+    .then(res => res.json())
+    .then(data => {
+        appendOutput(data.output + "\n──────────────────────────────────────────────\n");
+        status.textContent = "● Ready";
+        status.style.color = "#3fb950";
+    })
+    .catch(() => {
+        appendOutput("❌ Network error. Is the server running?\n");
+        status.textContent = "● Error";
+        status.style.color = "#f85149";
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.textContent = "Run ▶";
+    });
+}
+
+function appendOutput(text) {
+    const output = document.getElementById("terminal-output");
+    output.textContent += text;
+    output.scrollTop = output.scrollHeight;
+}
+
+// Allow Enter to run command (Shift+Enter for newline)
+document.getElementById("terminal-input").addEventListener("keydown", function(e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        runCommand();
+    }
+});
+
+// --- Flag submission ---
 function submitFlag(lab) {
     const flag = document.getElementById("flag").value;
     const btn = document.getElementById("submit-btn");

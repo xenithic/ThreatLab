@@ -1,11 +1,22 @@
 from flask import Flask, render_template, request, session, jsonify, redirect, url_for
 import os
+import re
 import sqlite3
+import subprocess
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-TARGET_HOST = os.getenv("TARGET_HOST", "127.0.0.1")
+# Local target for command execution (localhost for local testing)
+TARGET = "127.0.0.1"
+
+# --- Per-lab command whitelist ---
+# Each lab specifies the only command prefix the user may run.
+LAB_ALLOWED_COMMANDS = {
+    "nmap":   {"prefix": "nmap"},
+    "hydra":  {"prefix": "hydra"},
+    "sqlmap": {"prefix": "sqlmap"},
+}
 
 # --- Gamification: Flags & Points ---
 
@@ -124,12 +135,12 @@ def get_user_badges(username):
 # --- Context processor ---
 
 @app.context_processor
-def inject_target_host():
-    return dict(target_host=TARGET_HOST)
+def inject_target():
+    return dict(target_host=TARGET)
 
 # --- Auth: login required check ---
 
-PUBLIC_ENDPOINTS = {'login', 'register', 'static', 'submit_flag_unified'}
+PUBLIC_ENDPOINTS = {'login', 'register', 'static', 'submit_flag_unified', 'run_command'}
 
 @app.before_request
 def require_login():
@@ -243,6 +254,79 @@ def submit_flag_unified():
         conn.close()
 
     return jsonify({"status": "success", "message": "Correct flag!", "points": points})
+
+# --- Local command execution ---
+
+# Regex to strip IPv4 addresses and common hostnames from user input
+_IP_PATTERN = re.compile(
+    r'\b(?:\d{1,3}\.){3}\d{1,3}\b'
+    r'|\blocalhost\b'
+    r'|\bhost\.docker\.internal\b',
+    re.IGNORECASE,
+)
+
+
+@app.route('/run-command', methods=['POST'])
+def run_command():
+    """Execute a whitelisted command locally via subprocess.
+
+    • Validates the lab exists and command prefix is allowed.
+    • Strips any user-supplied IP/hostname.
+    • Auto-appends TARGET (127.0.0.1).
+    • Returns JSON with stdout/stderr.
+    """
+    data = request.get_json(silent=True) or {}
+    lab = data.get('lab', '').strip()
+    command = data.get('command', '').strip()
+
+    # --- basic validation ---
+    if not command:
+        return jsonify({"status": "error", "output": "❌ Enter a command"}), 400
+
+    lab_cfg = LAB_ALLOWED_COMMANDS.get(lab)
+    if lab_cfg is None:
+        return jsonify({"status": "error", "output": "❌ Unknown lab"}), 400
+
+    prefix = lab_cfg["prefix"]
+
+    if not command.startswith(prefix):
+        return jsonify({
+            "status": "error",
+            "output": f"❌ Only {prefix} commands are allowed in this lab",
+        }), 400
+
+    # --- security: reject shell meta-characters ---
+    dangerous = set(';|&$`\\\n')
+    if any(ch in command for ch in dangerous):
+        return jsonify({"status": "error", "output": "❌ Invalid command (illegal characters)"}), 400
+
+    # --- strip any user-supplied IPs / hostnames ---
+    sanitised = _IP_PATTERN.sub('', command).strip()
+    # collapse multiple spaces left over from stripping
+    sanitised = re.sub(r'\s{2,}', ' ', sanitised)
+
+    # --- auto-inject the correct target ---
+    final_command = f"{sanitised} {TARGET}"
+
+    # --- execute locally via subprocess ---
+    try:
+        output = subprocess.check_output(
+            final_command.split(),
+            stderr=subprocess.STDOUT,
+            timeout=30,
+        ).decode()
+    except subprocess.CalledProcessError as e:
+        output = e.output.decode() if e.output else f"❌ Command failed (exit code {e.returncode})"
+    except subprocess.TimeoutExpired:
+        output = "❌ Scan timed out (30s limit)"
+    except FileNotFoundError:
+        output = f"❌ '{prefix}' is not installed or not in PATH"
+    except Exception as exc:
+        output = f"❌ Execution error: {exc}"
+
+    output = output.strip() if output else "(no output)"
+    return jsonify({"status": "success", "output": output})
+
 
 # --- Learn routes ---
 
