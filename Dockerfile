@@ -4,16 +4,21 @@ RUN apt-get update && apt-get install -y \
     nmap \
     hydra \
     netcat-traditional \
-    netcat \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
 COPY . .
 
-RUN pip install --no-cache-dir flask
+COPY start.sh .
+RUN chmod +x start.sh
 
 EXPOSE 5000
+EXPOSE 5001
 
-CMD ["python", "app.py"]
+CMD ["bash", "start.sh"]
