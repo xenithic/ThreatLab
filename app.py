@@ -4,6 +4,10 @@ import re
 import sqlite3
 import subprocess
 
+# IMPORTANT:
+# This app must be run inside WSL/Ubuntu where hydra and nmap are installed.
+# Do NOT run using Windows Python or PyCharm interpreter.
+
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
@@ -140,7 +144,7 @@ def inject_target():
 
 # --- Auth: login required check ---
 
-PUBLIC_ENDPOINTS = {'login', 'register', 'static', 'submit_flag_unified', 'run_command'}
+PUBLIC_ENDPOINTS = {'login', 'register', 'static', 'submit_flag_unified', 'run_command', 'run_hydra'}
 
 @app.before_request
 def require_login():
@@ -311,7 +315,8 @@ def run_command():
     # --- execute locally via subprocess ---
     try:
         output = subprocess.check_output(
-            final_command.split(),
+            final_command,
+            shell=True,
             stderr=subprocess.STDOUT,
             timeout=30,
         ).decode()
@@ -326,6 +331,62 @@ def run_command():
 
     output = output.strip() if output else "(no output)"
     return jsonify({"status": "success", "output": output})
+
+
+print("Hydra path:", subprocess.getoutput("which hydra"))
+
+@app.route('/run-hydra', methods=['POST'])
+def run_hydra():
+    """Execute a controlled Hydra brute force attack.
+    
+    • Validates the command string contains 'hydra'
+    • Executes a fixed, safe hydra command
+    • Returns full output
+    """
+    data = request.get_json(silent=True) or {}
+    user_input = data.get('command', '').strip()
+
+    if not user_input.startswith("hydra"):
+        return jsonify({"output": "❌ Please enter a command starting with 'hydra'"})
+
+    # Enforce correct hydra structure (ignore user target)
+    command = (
+        "hydra -l admin -P passwords.txt -s 5000 127.0.0.1 http-post-form "
+        "\"/hydra-login:username=^USER^&password=^PASS^:Invalid credentials\" -t 1 -V"
+    )
+
+    print("Running Hydra:", command)
+
+    try:
+        result = subprocess.check_output(
+            command,
+            shell=True,
+            stderr=subprocess.STDOUT,
+            timeout=15
+        ).decode()
+    except subprocess.CalledProcessError as e:
+        result = e.output.decode() if e.output else ""
+    except subprocess.TimeoutExpired:
+        return jsonify({"output": "⚠️ Hydra timed out"})
+    except FileNotFoundError:
+        return jsonify({"output": "❌ Hydra not found. Ensure you are running Flask inside WSL/Ubuntu."})
+    except Exception as e:
+        return jsonify({"output": f"❌ Error: {str(e)}"})
+
+    match = re.search(r'login:\s*(\w+)\s+password:\s*(\w+)', result)
+    if match:
+        return jsonify({
+            "output": result,
+            "found": True,
+            "username": match.group(1),
+            "password": match.group(2)
+        })
+    else:
+        return jsonify({
+            "output": result,
+            "found": False
+        })
+
 
 
 # --- Learn routes ---
@@ -367,15 +428,11 @@ def lab_command_injection():
         ip = request.form.get('ip')
         if ip:
             # Vulnerable command execution
-            # Handling Windows vs Linux to ensure semicolon payloads work universally
-            if os.name == 'nt':
-                # Use powershell on Windows to support Linux-like ';' and 'cat' commands for the lab
-                cmd = f'powershell.exe -Command "ping {ip}"'
-            else:
-                cmd = f"ping -c 4 {ip}"
-                
+            cmd = f"ping -c 4 {ip}"
             try:
-                output = os.popen(cmd).read()
+                output = subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT, timeout=15).decode()
+            except subprocess.CalledProcessError as e:
+                output = e.output.decode() if e.output else str(e)
             except Exception as e:
                 output = str(e)
     return render_template('lab_command_injection.html', output=output)
@@ -492,7 +549,7 @@ def hydra_login():
     username = request.form.get('username', '')
     password = request.form.get('password', '')
     
-    if username == 'admin' and password == 'password123':
+    if username == 'admin' and password == '123456':
         return render_template('hydra_login.html', success=True, flag='flag{hydra_master}')
     
     return render_template('hydra_login.html', error='Invalid credentials')

@@ -1,0 +1,51 @@
+ThreatLab Docker Setup Instructions
+===================================
+
+Yes, the app is Docker-ready! A `Dockerfile` is already present and configured to install all the necessary system dependencies (like Nmap, Hydra, etc.) and run your Flask application.
+
+Follow these steps to set it up and run it using Docker:
+
+Prerequisites:
+--------------
+Make sure you have Docker Desktop installed and running on your Windows machine.
+
+Step 1: Open Terminal
+---------------------
+Open PowerShell, Command Prompt, or your preferred terminal.
+
+Step 2: Navigate to the Project Directory
+-----------------------------------------
+Make sure you are in the directory containing the Dockerfile:
+> cd "c:\Users\Nitesh Rai\PycharmProjects\New folder\threatlab"
+
+Step 3: Build the Docker Image
+------------------------------
+Run the following command to build the image. This will download Python, install the system tools (Hydra, Nmap), and install Flask.
+> docker build -t threatlab-app .
+
+Step 4: Run the Docker Container
+--------------------------------
+Once the build is complete, start the container and map port 5000 of the container to port 5000 on your machine:
+> docker run -d -p 5000:5000 --name threatlab-container threatlab-app
+
+Step 5: Access the Application
+------------------------------
+Open your web browser and navigate to:
+http://localhost:5000
+
+Additional Useful Commands:
+---------------------------
+- To see running containers:
+  > docker ps
+
+- To view the logs of your application:
+  > docker logs threatlab-container
+
+- To stop the running application:
+  > docker stop threatlab-container
+
+- To start it again after stopping:
+  > docker start threatlab-container
+
+- To remove the container entirely (if you want to start fresh or rebuild):
+  > docker rm -f threatlab-container
